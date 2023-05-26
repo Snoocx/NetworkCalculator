@@ -5,19 +5,19 @@ namespace NetworkCalculator
 {
     public class Network
     {
-        private string ipAddress;
-        private int cidr;
+        private string IpAddress { get; set; }
+        private int Cidr { get; set; }
+        private string BinaryIpAddress { get; set; }
+        private string BinarySubnetAddress { get; set; }
+        private string BinaryNetworkId { get; set; }
 
-        private string binaryIpAddress;
-        private string binarySubnetAddress;
-        private string binaryNetworkId;
-        private string binaryBroadcastAddress;
+        private string BinaryBroadcastAddress { get; set; }
 
-        private string subnetAddress;
-        private string networkId;
-        private string broadcastAddress;
+        private string SubnetAddress { get; set; }
+        private string NetworkId { get; set; }
+        private string BroadcastAddress { get; set; }
 
-        private int availableHosts;
+        private int AvailableHosts { get; set; }
         private string availableFrom;
         private string availableTo;
 
@@ -30,50 +30,37 @@ namespace NetworkCalculator
         /// <exception cref="Exception"></exception>
         public Network(string ipCidr)
         {
-            ipAddress = ipCidr.Split("/")[0];
-            cidr = int.Parse(ipCidr.Split("/")[1]);
+            ipCidr = ipCidr.Replace(" ", "");
 
-            if (ipAddress.Contains("+") || ipCidr.Contains("-"))
+            IpAddress = ipCidr.Split("/")[0];
+            Cidr = int.Parse(ipCidr.Split("/")[1]);
+
+            if (IpAddress.Contains("+") || ipCidr.Contains("-"))
                 throw new Exception();
 
-            if (cidr < 0 || cidr > 31)
+            if (Cidr < 0 || Cidr > 31)
                 throw new Exception();
 
-            binaryIpAddress = ConvertToBinary(ipAddress);
-            binarySubnetAddress = CalculateBinarySubnet(cidr);
-            binaryNetworkId = CalculateBinaryNetworkID(binaryIpAddress);
-            binaryBroadcastAddress = CalculateBinaryBroadcastAddress(binaryIpAddress);
+            BinaryIpAddress = ConvertToBinary(IpAddress);
+            BinarySubnetAddress = CalculateBinarySubnet(Cidr);
+            BinaryNetworkId = CalculateBinaryNetworkID(BinaryIpAddress);
+            BinaryBroadcastAddress = CalculateBinaryBroadcastAddress(BinaryIpAddress);
 
-            subnetAddress = ConvertToIPAddress(binarySubnetAddress);
-            networkId = ConvertToIPAddress(binaryNetworkId);
-            broadcastAddress = ConvertToIPAddress(binaryBroadcastAddress);
+            SubnetAddress = ConvertToIPAddress(BinarySubnetAddress);
+            NetworkId = ConvertToIPAddress(BinaryNetworkId);
+            BroadcastAddress = ConvertToIPAddress(BinaryBroadcastAddress);
 
-            availableHosts = CalculateAvailableHosts();
+            AvailableHosts = CalculateAvailableHosts();
             CalculateAvailableHostAddressRange(out availableFrom, out availableTo);
         }
-
-        public string GetAvailableFrom() { return availableFrom; }
-        public string GetAvailableTo() { return availableTo; }
-        public int GetAvailableHosts() { return availableHosts; }
-        public string GetSubnetAddress() { return subnetAddress; }
-        public string GetNetworkId() { return networkId; }
-        public string GetBroadcastAddress() { return broadcastAddress; }
-        public string GetNetworkID() { return networkId; }
-        public string GetIpAddress() { return ipAddress; }
-        public int GetCidrNotation() { return cidr; }
-        public string GetBinarySubnetAddress() { return binarySubnetAddress; }
-        public string GetBinaryIpAddress() { return binaryIpAddress; }
-        public string GetBinaryNetworkId() { return binaryNetworkId; }
-        public string GetBinaryBroadcastAddress() { return binaryBroadcastAddress; }
-
 
         /// <summary>
         /// Calculates all available hosts through cidr formula.
         /// </summary>
         /// <returns>integer of available hosts</returns>
-        public int CalculateAvailableHosts()
+        private int CalculateAvailableHosts()
         {
-            return (int)(Math.Pow(2, 32 - cidr) - 2);
+            return (int)(Math.Pow(2, 32 - Cidr) - 2);
         }
 
         /// <summary>
@@ -81,10 +68,10 @@ namespace NetworkCalculator
         /// </summary>
         /// <param name="binaryIpAddress"></param>
         /// <returns></returns>
-        public string CalculateBinaryNetworkID(string binaryIpAddress)
+        private string CalculateBinaryNetworkID(string binaryIpAddress)
         {
             char[] networkId = binaryIpAddress.ToCharArray();
-            for (int i = cidr; i < networkId.Length; i++)
+            for (int i = Cidr; i < networkId.Length; i++)
             {
                 networkId[i] = '0';
             }
@@ -96,10 +83,10 @@ namespace NetworkCalculator
         /// </summary>
         /// <param name="binaryIpAddress"></param>
         /// <returns>string of bits (ex. 11000000101010000110010000001010)</returns>
-        public string CalculateBinaryBroadcastAddress(string binaryIpAddress)
+        private string CalculateBinaryBroadcastAddress(string binaryIpAddress)
         {
             char[] broadcast = binaryIpAddress.ToCharArray();
-            for (int i = cidr; i < broadcast.Length; i++)
+            for (int i = Cidr; i < broadcast.Length; i++)
             {
                 broadcast[i] = '1';
             }
@@ -111,7 +98,7 @@ namespace NetworkCalculator
         /// </summary>
         /// <param name="cidr"></param>
         /// <returns>string of bits (ex. 11000000101010000110010000001010)</returns>
-        public string CalculateBinarySubnet(int cidr)
+        private string CalculateBinarySubnet(int cidr)
         {
             string binarySubnet = "";
             for (int i = 1; i <= 32; i++)
@@ -132,8 +119,8 @@ namespace NetworkCalculator
         /// <returns>out string availableFrom, out string availableTo</returns>
         private void CalculateAvailableHostAddressRange(out string availableFrom, out string availableTo)
         {
-            byte[] networkBytes = IPAddress.Parse(networkId).GetAddressBytes();
-            byte[] broadcastMaskBytes = IPAddress.Parse(broadcastAddress).GetAddressBytes();
+            byte[] networkBytes = IPAddress.Parse(NetworkId).GetAddressBytes();
+            byte[] broadcastMaskBytes = IPAddress.Parse(BroadcastAddress).GetAddressBytes();
 
             var from = (int)networkBytes[3] + 1;
             var to = (int)broadcastMaskBytes[3] - 1;
@@ -147,7 +134,7 @@ namespace NetworkCalculator
         /// </summary>
         /// <param name="binaryAddress"></param>
         /// <returns>string of IP-Address (ex. 192.168.0.0)</returns>
-        static string ConvertToIPAddress(string binaryAddress)
+        private string ConvertToIPAddress(string binaryAddress)
         {
             byte[] addressBytes = new byte[4];
             for (int i = 0; i < 4; i++)
@@ -163,7 +150,7 @@ namespace NetworkCalculator
         /// </summary>
         /// <param name="ipAddress"></param>
         /// <returns>string of bits (ex. 11000000101010000110010000001010)</returns>
-        public string ConvertToBinary(string ipAddress)
+        private string ConvertToBinary(string ipAddress)
         {
             var sb = new StringBuilder();
 
@@ -184,7 +171,7 @@ namespace NetworkCalculator
         /// <param name="label"></param>
         /// <param name="binaryAddress"></param>
         /// <param name="cidr"></param>
-        public void DisplayBinaryAddress(string label, string binaryAddress, int cidr)
+        private void DisplayBinaryAddress(string label, string binaryAddress)
         {
             Console.Write($"{label}");
             Console.Write("[");
@@ -195,7 +182,7 @@ namespace NetworkCalculator
                     Console.ResetColor();
                     Console.Write("].[");
                 }
-                if (i < cidr)
+                if (i < Cidr)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkBlue;
                     Console.Write(binaryAddress[i]);
@@ -216,20 +203,20 @@ namespace NetworkCalculator
         /// </summary>
         public void ConsoleWrite()
         {
-            Console.WriteLine("IP Adresse:\t\t\t" + GetIpAddress());
-            Console.WriteLine("CIDR Notation:\t\t\t" + GetCidrNotation());
-            Console.WriteLine("Subnetzmaske:\t\t\t" + GetSubnetAddress());
-            Console.WriteLine("Netzwerk-ID:\t\t\t" + GetNetworkId());
-            Console.WriteLine("Broadcast-Adresse:\t\t" + GetBroadcastAddress());
+            Console.WriteLine("IP Adresse:\t\t\t" + IpAddress);
+            Console.WriteLine("CIDR Notation:\t\t\t" + Cidr);
+            Console.WriteLine("Subnetzmaske:\t\t\t" + SubnetAddress);
+            Console.WriteLine("Netzwerk-ID:\t\t\t" + NetworkId);
+            Console.WriteLine("Broadcast-Adresse:\t\t" + BroadcastAddress);
             Console.WriteLine();
-            Console.WriteLine("Insgesamt verfügbare Hosts:\t" + GetAvailableHosts());
-            Console.WriteLine("Erster verfügbarer Host:\t" + GetAvailableFrom());
-            Console.WriteLine("Letzter verfügbarer Host:\t" + GetAvailableTo());
+            Console.WriteLine("Insgesamt verfügbare Hosts:\t" + AvailableHosts);
+            Console.WriteLine("Erster verfügbarer Host:\t" + availableFrom);
+            Console.WriteLine("Letzter verfügbarer Host:\t" + availableTo);
             Console.WriteLine();
-            DisplayBinaryAddress("IP-Adresse (Binär):\t\t", GetBinaryIpAddress(), GetCidrNotation());
-            DisplayBinaryAddress("Subnetzmaske (Binär):\t\t", GetBinarySubnetAddress(), GetCidrNotation());
-            DisplayBinaryAddress("NetzID (Binär):\t\t\t", GetBinaryNetworkId(), GetCidrNotation());
-            DisplayBinaryAddress("Broadcast (Binär):\t\t", GetBinaryBroadcastAddress(), GetCidrNotation());
+            DisplayBinaryAddress("IP-Adresse (Binär):\t\t", BinaryIpAddress);
+            DisplayBinaryAddress("Subnetzmaske (Binär):\t\t", BinarySubnetAddress);
+            DisplayBinaryAddress("NetzID (Binär):\t\t\t", BinaryNetworkId);
+            DisplayBinaryAddress("Broadcast (Binär):\t\t", BinaryBroadcastAddress);
             Console.WriteLine();
         }
     }
