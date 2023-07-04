@@ -3,22 +3,6 @@ using System.Text;
 
 namespace NetworkCalculator
 {
-    public class Subnet
-    {
-        private string Name { get; set; }
-        private string NetworkAddress { get; set; }
-        private string BinarySubnetAddress { get; set; }
-        private string NetworkId { get; set; }
-
-        public Subnet(string networkAddress, int cidr)
-        {
-            NetworkAddress = networkAddress;
-            BinarySubnetAddress = Network.CalculateBinarySubnet(cidr);
-        }
-
-    }
-
-
     public class Network
     {
         private string IpAddress { get; set; }
