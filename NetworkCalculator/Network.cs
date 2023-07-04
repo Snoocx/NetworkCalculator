@@ -3,6 +3,22 @@ using System.Text;
 
 namespace NetworkCalculator
 {
+    public class Subnet
+    {
+        private string Name { get; set; }
+        private string NetworkAddress { get; set; }
+        private string BinarySubnetAddress { get; set; }
+        private string NetworkId { get; set; }
+
+        public Subnet(string networkAddress, int cidr)
+        {
+            NetworkAddress = networkAddress;
+            BinarySubnetAddress = Network.CalculateBinarySubnet(cidr);
+        }
+
+    }
+
+
     public class Network
     {
         private string IpAddress { get; set; }
@@ -10,7 +26,6 @@ namespace NetworkCalculator
         private string BinaryIpAddress { get; set; }
         private string BinarySubnetAddress { get; set; }
         private string BinaryNetworkId { get; set; }
-
         private string BinaryBroadcastAddress { get; set; }
 
         private string SubnetAddress { get; set; }
@@ -98,7 +113,7 @@ namespace NetworkCalculator
         /// </summary>
         /// <param name="cidr"></param>
         /// <returns>string of bits (ex. 11000000101010000110010000001010)</returns>
-        private string CalculateBinarySubnet(int cidr)
+        public static string CalculateBinarySubnet(int cidr)
         {
             string binarySubnet = "";
             for (int i = 1; i <= 32; i++)
